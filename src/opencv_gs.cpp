@@ -68,16 +68,12 @@ int main(int argc, char **argv)
     int capture_width = width;
     int capture_height = height;
     int capture_framerate = framerate;
-    int display_width = width ;
-    int display_height = height ;
     int flip_method = 0 ;
     cap.open("nvarguscamerasrc ! video/x-raw(memory:NVMM), width=(int)" + std::to_string(capture_width) + 
             ", height=(int)" + std::to_string(capture_height) + 
             ", format=(string)NV12, framerate=(fraction)" + std::to_string(capture_framerate) +
-            "/1 ! nvvidconv flip-method=" + std::to_string(flip_method) + 
-            " ! video/x-raw, width=(int)" + std::to_string(display_width) + 
-            ", height=(int)" + std::to_string(display_height) + 
-            ", format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink", cv::CAP_GSTREAMER);
+            "/1 ! nvvidconv flip-method=" + std::to_string(flip_method) + " ! appsink", 
+            cv::CAP_GSTREAMER);
 
     if(!cap.isOpened())  // check if we succeeded
         return EXIT_FAILURE;
