@@ -71,7 +71,7 @@ int main(int argc, char **argv)
     int flip_method = 0 ;
     cap.open("nvarguscamerasrc ! video/x-raw(memory:NVMM), width=(int)" + std::to_string(capture_width) + 
             ", height=(int)" + std::to_string(capture_height) + 
-            ", format=(string)NV12, framerate=(fraction)" + std::to_string(capture_framerate) +
+            ", format=(string)RG10, framerate=(fraction)" + std::to_string(capture_framerate) +
             "/1 ! nvvidconv flip-method=" + std::to_string(flip_method) + " ! appsink", 
             cv::CAP_GSTREAMER);
 
