@@ -16,7 +16,7 @@ set (OPENCV_MAIN_GL_DISPLAY_BIN "opencv-main-gl-display")
 set (OPENCV_MAIN_GPU_DISPLAY_BIN "opencv-main-gpu-display")
 set (OPENCV_BUILDINFO_BIN "opencv-buildinfo")
 
-find_package( OpenCV REQUIRED )
+find_package( OpenCV 4 REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 # Include the directories containing libraries
