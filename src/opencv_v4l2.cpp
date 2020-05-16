@@ -11,6 +11,9 @@
 #include <cstdlib>
 #include "v4l2_helper.h"
 
+#include <chrono> 
+using namespace std::chrono; 
+
 using namespace std;
 using namespace cv;
 
@@ -88,7 +91,7 @@ int main(int argc, char **argv)
 	 *
 	 * [1]: https://linuxtv.org/downloads/v4l-dvb-apis/uapi/v4l/pixfmt-v4l2.html#c.v4l2_pix_format
 	 */
-	if (helper_init_cam(videodev, width, height, V4L2_PIX_FMT_UYVY, framerate, IO_METHOD_USERPTR) < 0) 
+	if (helper_init_cam(videodev, width, height, V4L2_PIX_FMT_YUYV, framerate, IO_METHOD_USERPTR) < 0) 
     {
 		return EXIT_FAILURE;
 	}
@@ -141,10 +144,14 @@ int main(int argc, char **argv)
         /*
          * Helper function to access camera data
          */
+        auto T0 = high_resolution_clock::now(); 
         if (helper_get_cam_frame(&ptr_cam_frame, &bytes_used) < 0) 
         {
             break;
         }
+        auto T1 = high_resolution_clock::now(); 
+        auto D = duration_cast<milliseconds>(T1 - T0); 
+        cout << "get a frame using time: " << D.count() << endl;
 
         /*
          * It's easy to re-use the matrix for our case (V4L2 user pointer) by changing the
