@@ -23,7 +23,7 @@ unsigned int GetTickCount()
 
 int main(int argc, char **argv)
 {
-	unsigned int width, height;
+	unsigned int width, height, framerate;
 	unsigned int start, end , fps = 0;
 	VideoCapture cap(0 + CAP_V4L2); // open the default camera with V4L2 backend
 
@@ -37,13 +37,14 @@ int main(int argc, char **argv)
 	cuda::GpuMat gpu_frame;
 	#endif
 
-	if (argc == 3)
+	if (argc == 4)
 	{
 		/*
 		 * Courtesy: https://stackoverflow.com/a/2797823
 		 */
 		string width_str = argv[1];
 		string height_str = argv[2];
+		string framerate_str = argv[3];
 		try {
 			size_t pos;
 			width = stoi(width_str, &pos);
@@ -55,27 +56,35 @@ int main(int argc, char **argv)
 			if (pos < height_str.size()) {
 				cerr << "Trailing characters after height: " << height_str << '\n';
 			}
+
+			framerate = stoi(framerate_str, &pos);
+			if (pos < framerate_str.size()) {
+				cerr << "Trailing characters after framerate: " << framerate_str << '\n';
+			}
 		} catch (invalid_argument const &ex) {
-			cerr << "Invalid width or height\n";
+			cerr << "Invalid width, height, or framerate\n";
 			return EXIT_FAILURE;
 		} catch (out_of_range const &ex) {
-			cerr << "Width or Height out of range\n";
+			cerr << "Width, Height, or Framerate out of range\n";
 			return EXIT_FAILURE;
 		}
 	}
 	else
 	{
-		cout << "Note: This program accepts (only) two arguments. First arg: width, Second arg: height\n";
+		cout << "Note: This program accepts (only) three arguments. First arg: width, Second arg: height, third arg: framerate\n";
 		cout << "No arguments given. Assuming default values. Width: 640; Height: 480\n";
 		width = 640;
 		height = 480;
+		fraterate = 24; 
 	}
 
 	if(!cap.isOpened())  // check if we succeeded
 		return EXIT_FAILURE;
 	cap.set(CAP_PROP_FRAME_WIDTH, width);
 	cap.set(CAP_PROP_FRAME_HEIGHT, height);
+	cap.set(CAP_PROP_FRAME_FPS, framerate);
 	cout << "Current resolution: Width: " << cap.get(CAP_PROP_FRAME_WIDTH) << " Height: " << cap.get(CAP_PROP_FRAME_HEIGHT) << '\n';
+	cout << "Current framerate: " << cap.get(CAP_PROP_FRAME_FPS) << '\n';
 
 #ifdef ENABLE_DISPLAY
 	/*
