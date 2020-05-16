@@ -464,7 +464,7 @@ static int init_device(unsigned int width, unsigned int height, unsigned int for
 
     if (-1 == xioctl(fd, VIDIOC_S_PARM, &sparm))
 	{
-		fprintf(stderr, "Error occurred when trying to set parm\n");
+		fprintf(stderr, "Error occurred when trying to set streamparm: %d\n", errno);
 		return ERR;
 	}
 
