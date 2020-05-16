@@ -4,6 +4,7 @@ project ("OpenCV V4L2")
 
 set (V4L2_SOURCE "src/opencv_v4l2.cpp")
 set (MAIN_SOURCE "src/opencv_main.cpp")
+set (GS_SOURCE "src/opencv_gs.cpp")
 set (INFO_SOURCE "src/opencv_buildinfo.cpp")
 
 set (OPENCV_V4L2_BIN "opencv-v4l2")
@@ -14,6 +15,7 @@ set (OPENCV_MAIN_BIN "opencv-main")
 set (OPENCV_MAIN_DISPLAY_BIN "opencv-main-display")
 set (OPENCV_MAIN_GL_DISPLAY_BIN "opencv-main-gl-display")
 set (OPENCV_MAIN_GPU_DISPLAY_BIN "opencv-main-gpu-display")
+set (OPENCV_GS_BIN "opencv-gs")
 set (OPENCV_BUILDINFO_BIN "opencv-buildinfo")
 
 find_package( OpenCV 4 REQUIRED )
@@ -67,6 +69,9 @@ add_executable (${OPENCV_MAIN_GPU_DISPLAY_BIN} ${MAIN_SOURCE})
 target_compile_definitions (${OPENCV_MAIN_GPU_DISPLAY_BIN} PUBLIC ENABLE_DISPLAY PUBLIC ENABLE_GL_DISPLAY PUBLIC ENABLE_GPU_UPLOAD)
 target_link_libraries (${OPENCV_MAIN_GPU_DISPLAY_BIN} ${OpenCV_LIBS})
 
+add_executable (${OPENCV_GS_BIN} ${GS_SOURCE})
+target_link_libraries (${OPENCV_GS_BIN} ${OpenCV_LIBS})
+
 add_executable (${OPENCV_BUILDINFO_BIN} ${INFO_SOURCE})
 target_link_libraries (${OPENCV_BUILDINFO_BIN} ${OpenCV_LIBS})
 
@@ -79,6 +84,7 @@ install (
 	${OPENCV_MAIN_BIN}
 	${OPENCV_MAIN_DISPLAY_BIN}
 	${OPENCV_MAIN_GL_DISPLAY_BIN}
+	${OPENCV_GS_BIN}
 	${OPENCV_MAIN_GPU_DISPLAY_BIN}
 	RUNTIME DESTINATION bin
 )
