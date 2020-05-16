@@ -433,7 +433,7 @@ static int init_device(unsigned int width, unsigned int height, unsigned int for
 	fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	fmt.fmt.pix.width       = width;
 	fmt.fmt.pix.height      = height;
-	// fmt.fmt.pix.pixelformat = format;
+	fmt.fmt.pix.pixelformat = format;
 	fmt.fmt.pix.field       = V4L2_FIELD_INTERLACED;
 
 	if (-1 == xioctl(fd, VIDIOC_S_FMT, &fmt))
@@ -454,7 +454,6 @@ static int init_device(unsigned int width, unsigned int height, unsigned int for
 	)
 	{
 		fprintf(stderr, "Warning: The current format does not match requested format/resolution!\n");
-		fprintf(stderr, "pixelformat: %d", fmt.fmt.pix.pixelformat);
 		return ERR;
 	}
 
