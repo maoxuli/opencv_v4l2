@@ -59,8 +59,8 @@ int main(int argc, char **argv)
     {
         cout << "Note: This program accepts (only) three arguments. First arg: width, Second arg: height, third arg: framerate\n";
         cout << "No arguments given. Assuming default values. Width: 640; Height: 480\n";
-        width = 640;
-        height = 480;
+        width = 1280;
+        height = 720;
         framerate = 30; 
     }
 
@@ -71,7 +71,7 @@ int main(int argc, char **argv)
     int flip_method = 0 ;
     cap.open("nvarguscamerasrc ! video/x-raw(memory:NVMM), width=(int)" + std::to_string(capture_width) + 
             ", height=(int)" + std::to_string(capture_height) + 
-            ", format=(string)RG10, framerate=(fraction)" + std::to_string(capture_framerate) +
+            ", format=(string)NV12, framerate=(fraction)" + std::to_string(capture_framerate) +
             "/1 ! nvvidconv flip-method=" + std::to_string(flip_method) + " ! appsink", 
             cv::CAP_GSTREAMER);
 
