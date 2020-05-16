@@ -363,7 +363,7 @@ static int init_userp(unsigned int buffer_size)
 	return 0;
 }
 
-static int init_device(unsigned int width, unsigned int height, unsigned int format)
+static int init_device(unsigned int width, unsigned int height, unsigned int format, unsigned int fps)
 {
 	struct v4l2_capability cap;
 	struct v4l2_cropcap cropcap;
@@ -457,6 +457,17 @@ static int init_device(unsigned int width, unsigned int height, unsigned int for
 		return ERR;
 	}
 
+	struct v4l2_streamparm sparm;
+    sparm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    sparm.parm.capture.timeperframe.numerator = 1;
+    sparm.parm.capture.timeperframe.denominator = fps;
+
+    if (-1 == xioctl(fd, VIDIOC_S_PARM, &sparm))
+	{
+		fprintf(stderr, "Error occurred when trying to set parm\n");
+		return ERR;
+	}
+
 	/* Buggy driver paranoia. */
 	min = fmt.fmt.pix.width * 2;
 	if (fmt.fmt.pix.bytesperline < min)
@@ -528,7 +539,7 @@ static int open_device(const char *dev_name)
 /**
  * Start of public helper functions
  */
-int helper_init_cam(const char* devname, unsigned int width, unsigned int height, unsigned int format, enum io_method io_meth)
+int helper_init_cam(const char* devname, unsigned int width, unsigned int height, unsigned int format, unsigned int fps, enum io_method io_meth)
 {
 	if (is_initialised)
 	{
@@ -544,7 +555,7 @@ int helper_init_cam(const char* devname, unsigned int width, unsigned int height
 	if(
 		set_io_method(io_meth) < 0 ||
 		open_device(devname) < 0 ||
-		init_device(width,height,format) < 0 ||
+		init_device(width,height,format,fps) < 0 ||
 		start_capturing() < 0
 	)
 	{

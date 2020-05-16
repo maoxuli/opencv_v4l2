@@ -57,10 +57,11 @@ int main(int argc, char **argv)
     }
     else
     {
-        cout << "Note: This program accepts (only) three arguments. First arg: width, Second arg: height, third arg: framerate\n";
-        cout << "No arguments given. Assuming default values. Width: 640; Height: 480\n";
-        width = 1280;
-        height = 720;
+        cout << "Note: This program accepts (only) three arguments\n";
+        cout << "First arg: width, Second arg: height, third arg: framerate\n";
+        cout << "No arguments given. Assuming default values. Width: 640; Height: 480; fps: 30\n";
+        width = 640;
+        height = 480;
         framerate = 30; 
     }
 
@@ -70,7 +71,7 @@ int main(int argc, char **argv)
 
     cap.set(CAP_PROP_FRAME_WIDTH, width);
     cap.set(CAP_PROP_FRAME_HEIGHT, height);
-    // cap.set(CAP_PROP_FPS, framerate);
+    cap.set(CAP_PROP_FPS, framerate);
     cout << "Current resolution: Width: " << cap.get(CAP_PROP_FRAME_WIDTH) << " Height: " << cap.get(CAP_PROP_FRAME_HEIGHT) << '\n';
     // cout << "Current framerate: " << cap.get(CAP_PROP_FPS) << '\n';
 

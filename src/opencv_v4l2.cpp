@@ -28,10 +28,10 @@ unsigned int GetTickCount()
  */
 int main(int argc, char **argv)
 {
-    unsigned int width, height;
+    unsigned int width, height, framerate;
     static const char* default_videodev = "/dev/video0";
     const char *videodev;
-    if (argc == 4) 
+    if (argc == 5) 
     {
         videodev = argv[1];
 
@@ -40,6 +40,7 @@ int main(int argc, char **argv)
          */
         string width_str = argv[2];
         string height_str = argv[3];
+        string framerate_str = argv[4];
         try {
             size_t pos;
             width = stoi(width_str, &pos);
@@ -51,21 +52,27 @@ int main(int argc, char **argv)
             if (pos < height_str.size()) {
                 cerr << "Trailing characters after height: " << height_str << '\n';
             }
+
+            framerate = stoi(framerate_str, &pos);
+            if (pos < framerate_str.size()) {
+                cerr << "Trailing characters after framerate: " << framerate_str << '\n';
+            }
         } catch (invalid_argument const &ex) {
-            cerr << "Invalid width or height\n";
+            cerr << "Invalid width, height, or framerate\n";
             return EXIT_FAILURE;
         } catch (out_of_range const &ex) {
-            cerr << "Width or Height out of range\n";
+            cerr << "Width, Height, or Framerate out of range\n";
             return EXIT_FAILURE;
         }
     } else {
-        cout << "Note: This program accepts (only) three arguments.\n";
-        cout << "First arg: device file path, Second arg: width, Third arg: height\n";
+        cout << "Note: This program accepts (only) four arguments.\n";
+        cout << "First arg: device file path, Second arg: width, Third arg: height, fourth arg: fps\n";
         cout << "No arguments given. Assuming default values.\n";
-        cout << "Device file path: " << default_videodev << "; Width: 1280; Height: 720\n";
+        cout << "Device file path: " << default_videodev << "; Width: 640; Height: 480; fps: 30\n";
         videodev = default_videodev;
-        width = 1280;
-        height = 720;
+        width = 640;
+        height = 480;
+        framerate = 30; 
     }
 
 	/*
@@ -81,7 +88,7 @@ int main(int argc, char **argv)
 	 *
 	 * [1]: https://linuxtv.org/downloads/v4l-dvb-apis/uapi/v4l/pixfmt-v4l2.html#c.v4l2_pix_format
 	 */
-	if (helper_init_cam(videodev, width, height, V4L2_PIX_FMT_UYVY, IO_METHOD_USERPTR) < 0) 
+	if (helper_init_cam(videodev, width, height, V4L2_PIX_FMT_UYVY, framerate, IO_METHOD_USERPTR) < 0) 
     {
 		return EXIT_FAILURE;
 	}

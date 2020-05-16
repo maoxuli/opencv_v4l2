@@ -39,7 +39,7 @@ enum io_method {
  * All functions return 0 on success and ERR ( a negative value) in case of failure.
  */
 
-int helper_init_cam(const char* devname, unsigned int width, unsigned int height, unsigned int format, enum io_method io_meth);
+int helper_init_cam(const char* devname, unsigned int width, unsigned int height, unsigned int format, unsigned int fps, enum io_method io_meth);
 
 int helper_get_cam_frame(unsigned char** pointer_to_cam_data, int *size);
 
