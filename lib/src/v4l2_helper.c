@@ -42,7 +42,6 @@ struct buffer {
 
 static enum io_method   io = IO_METHOD_MMAP;
 static int              fd = -1;
-static int				fd_media = -1;
 static struct buffer          *buffers;
 static unsigned int     n_buffers;
 static struct v4l2_buffer frame_buf;
@@ -459,11 +458,12 @@ static int init_device(unsigned int width, unsigned int height, unsigned int for
 	}
 
 	struct v4l2_streamparm sparm;
+	CLEAR(sparm);
     sparm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     sparm.parm.capture.timeperframe.numerator = 1;
     sparm.parm.capture.timeperframe.denominator = fps;
 
-    if (-1 == xioctl(fd_media, VIDIOC_S_PARM, &sparm))
+    if (-1 == xioctl(fd, VIDIOC_S_PARM, &sparm))
 	{
 		fprintf(stderr, "Error occurred when trying to set streamparm: %d\n", errno);
 		return ERR;
@@ -504,8 +504,6 @@ static int close_device(void)
 
 	fd = -1;
 
-	close(fd_media);
-
 	return 0;
 }
 
@@ -525,7 +523,6 @@ static int open_device(const char *dev_name)
 	}
 
 	fd = open(dev_name, O_RDWR /* required */ | O_NONBLOCK, 0);
-	fd_media = open("/dev/media0", O_RDWR /* required */ | O_NONBLOCK, 0);
 
 	if (-1 == fd) {
 		fprintf(stderr, "Cannot open '%s': %d, %s\n",
