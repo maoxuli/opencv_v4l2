@@ -457,17 +457,17 @@ static int init_device(unsigned int width, unsigned int height, unsigned int for
 		return ERR;
 	}
 
-	struct v4l2_streamparm sparm;
-	CLEAR(sparm);
-    sparm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    sparm.parm.capture.timeperframe.numerator = 1;
-    sparm.parm.capture.timeperframe.denominator = fps;
+	// struct v4l2_streamparm sparm;
+	// CLEAR(sparm);
+    // sparm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    // sparm.parm.capture.timeperframe.numerator = 1;
+    // sparm.parm.capture.timeperframe.denominator = fps;
 
-    if (-1 == xioctl(fd, VIDIOC_S_PARM, &sparm))
-	{
-		fprintf(stderr, "Error occurred when trying to set streamparm: %d\n", errno);
-		return ERR;
-	}
+    // if (-1 == xioctl(fd, VIDIOC_S_PARM, &sparm))
+	// {
+	// 	fprintf(stderr, "Error occurred when trying to set streamparm: %d\n", errno);
+	// 	return ERR;
+	// }
 
 	/* Buggy driver paranoia. */
 	min = fmt.fmt.pix.width * 2;
