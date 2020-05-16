@@ -75,16 +75,16 @@ int main(int argc, char **argv)
 		cout << "No arguments given. Assuming default values. Width: 640; Height: 480\n";
 		width = 640;
 		height = 480;
-		fraterate = 24; 
+		framerate = 24; 
 	}
 
 	if(!cap.isOpened())  // check if we succeeded
 		return EXIT_FAILURE;
 	cap.set(CAP_PROP_FRAME_WIDTH, width);
 	cap.set(CAP_PROP_FRAME_HEIGHT, height);
-	cap.set(CAP_PROP_FRAME_FPS, framerate);
+	cap.set(CAP_PROP_FPS, framerate);
 	cout << "Current resolution: Width: " << cap.get(CAP_PROP_FRAME_WIDTH) << " Height: " << cap.get(CAP_PROP_FRAME_HEIGHT) << '\n';
-	cout << "Current framerate: " << cap.get(CAP_PROP_FRAME_FPS) << '\n';
+	cout << "Current framerate: " << cap.get(CAP_PROP_FPS) << '\n';
 
 #ifdef ENABLE_DISPLAY
 	/*
