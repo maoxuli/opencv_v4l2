@@ -25,7 +25,7 @@ int main(int argc, char **argv)
 {
 	unsigned int width, height, framerate;
 	unsigned int start, end , fps = 0;
-	VideoCapture cap(0);// + CAP_V4L2); // open the default camera with V4L2 backend
+	VideoCapture cap(0 + CAP_V4L2); // open the default camera with V4L2 backend
 
 	/*
 	 * Re-using the frame matrix(ces) instead of creating new ones (i.e., declaring 'Mat frame'
