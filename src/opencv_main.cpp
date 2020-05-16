@@ -70,7 +70,7 @@ int main(int argc, char **argv)
 
     cap.set(CAP_PROP_FRAME_WIDTH, width);
     cap.set(CAP_PROP_FRAME_HEIGHT, height);
-    cap.set(CAP_PROP_FPS, framerate);
+    // cap.set(CAP_PROP_FPS, framerate);
     cout << "Current resolution: Width: " << cap.get(CAP_PROP_FRAME_WIDTH) << " Height: " << cap.get(CAP_PROP_FRAME_HEIGHT) << '\n';
     // cout << "Current framerate: " << cap.get(CAP_PROP_FPS) << '\n';
 
