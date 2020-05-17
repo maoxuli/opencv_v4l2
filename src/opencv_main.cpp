@@ -73,7 +73,7 @@ int main(int argc, char **argv)
     cap.set(CAP_PROP_FRAME_HEIGHT, height);
     cap.set(CAP_PROP_FPS, framerate);
     cout << "Current resolution: Width: " << cap.get(CAP_PROP_FRAME_WIDTH) << " Height: " << cap.get(CAP_PROP_FRAME_HEIGHT) << '\n';
-    // cout << "Current framerate: " << cap.get(CAP_PROP_FPS) << '\n';
+    cout << "Current framerate: " << cap.get(CAP_PROP_FPS) << '\n';
 
     /*
         * Re-using the frame matrix(ces) instead of creating new ones (i.e., declaring 'Mat frame'
@@ -100,6 +100,7 @@ int main(int argc, char **argv)
     cout << "Note: Click 'Esc' key to exit the window.\n";
 #endif
 
+    int index = 0;
     start = GetTickCount();
     while (1) 
     {
@@ -109,6 +110,8 @@ int main(int argc, char **argv)
             cerr << "Empty frame received from camera!\n";
             return EXIT_FAILURE;
         }
+
+        imwrite("/home/media/b/" + std::to_string(index++) + ".jpg", frame); 
 
     #ifdef ENABLE_DISPLAY
         /*

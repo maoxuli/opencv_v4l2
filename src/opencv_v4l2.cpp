@@ -91,7 +91,7 @@ int main(int argc, char **argv)
 	 *
 	 * [1]: https://linuxtv.org/downloads/v4l-dvb-apis/uapi/v4l/pixfmt-v4l2.html#c.v4l2_pix_format
 	 */
-	if (helper_init_cam(videodev, width, height, V4L2_PIX_FMT_YUYV, framerate, IO_METHOD_USERPTR) < 0) 
+	if (helper_init_cam(videodev, width, height, V4L2_PIX_FMT_UYVY, framerate, IO_METHOD_USERPTR) < 0) 
     {
 		return EXIT_FAILURE;
 	}
@@ -137,6 +137,8 @@ int main(int argc, char **argv)
      *
      * [2]: https://docs.opencv.org/3.4.2/d3/d63/classcv_1_1Mat.html#a2ec3402f7d165ca34c7fd6e8498a62ca
      */
+
+    int index = 0;
     yuyv_frame = Mat(height, width, CV_8UC2);
     start = GetTickCount();
     while(1) 
@@ -177,7 +179,8 @@ int main(int argc, char **argv)
          *
          * [3]: https://docs.opencv.org/3.4.2/d7/d1b/group__imgproc__misc.html#ga4e0972be5de079fed4e3a10e24ef5ef0
          */
-        // cvtColor(yuyv_frame, preview, COLOR_YUV2BGR_UYVY);
+        cvtColor(yuyv_frame, preview, COLOR_YUV2BGR_UYVY);
+        imwrite("/home/media/c/" + std::to_string(index++) + ".jpg", preview); 
 
     #ifdef ENABLE_DISPLAY
         /*
