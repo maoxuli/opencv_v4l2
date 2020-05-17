@@ -87,10 +87,10 @@ int main(int argc, char **argv)
 
 
     std::string output_pipeline = std::string("appsrc ! video/x-raw, format=(string)BGR ! videoconvert ! video/x-raw, format=BGRx ! ") + 
-                                  "nvvidconv ! video/x-raw(memory:NVMM), format=(string)I420 ! " + 
-                                  //"nvvidconv ! video/x-raw(memory:NVMM), format=(string)NV12 ! " +
-                                  "nvv4l2h264enc preset-level=1 profile=2 control-rate=1 bitrate=10000000 ! " +
-                                  //"nvv4l2h264enc preset-level=3 profile=4 insert-sps-pps=1 qp-range=8,24:8,24:8,24 ! " +
+                                  //"nvvidconv ! video/x-raw(memory:NVMM), format=(string)I420 ! " + 
+                                  "nvvidconv ! video/x-raw(memory:NVMM), format=(string)NV12 ! " +
+                                  //"nvv4l2h264enc preset-level=1 profile=2 control-rate=1 bitrate=10000000 ! " +
+                                  "nvv4l2h264enc preset-level=3 profile=4 insert-sps-pps=1 qp-range=8,24:8,24:8,24 ! " +
                                   "video/x-h264, stream-format=(string)byte-stream ! h264parse ! qtmux ! " +
                                   "filesink location=output.mp4";
 
