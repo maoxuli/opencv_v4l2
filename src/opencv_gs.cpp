@@ -84,16 +84,25 @@ int main(int argc, char **argv)
 
     capture_width = cap.get(CAP_PROP_FRAME_WIDTH);
     capture_height = cap.get(CAP_PROP_FRAME_HEIGHT);
-    cout << "Current resolution: Width: " << capture_width << " Height: " << capture_height << '\n';
-    // cout << "Current framerate: " << cap.get(CAP_PROP_FPS) << '\n';
+    cout << "Capture resolution: Width: " << capture_width << " Height: " << capture_height << '\n';
+    cout << "Capture frame rate: " << cap.get(CAP_PROP_FPS) << '\n';
 
 
-    std::string output_pipeline = "appsrc ! videoconvert ! video/x-raw, width=(int)" + std::to_string(capture_width) + 
-                                  ", height=(int)" + std::to_string(capture_height) +  ", format=(string)I420 " + 
-                                  "! omxh264enc preset-level=0 ! video/x-h264, stream-format=(string)byte-stream " + 
-                                  "! filesink location=output.mp4 ";
-    int codec = cv::VideoWriter::fourcc('m', 'p', '4', 'v'); 
-    cv::VideoWriter writer(output_pipeline, cv::CAP_GSTREAMER, codec, (double)capture_framerate, cv::Size(capture_width, capture_height)); 
+    // "appsrc ! video/x-raw,width=1920,height=1080,format=(string)RGB,framerate=(fraction)15/1 " +
+    // "! nvvideoconvert ! video/x-raw(memory:NVMM), format=(string)NV12 " +
+    // "! nvv4l2h264enc preset-level=3 profile=4 insert-sps-pps=1 qp-range=8,24:8,24:8,24 " +
+    // "! video/x-h264,stream-format=byte-stream ! h264parse ! qtmux " + 
+    // "! filesink location=output.mp4"
+
+    // std::string output_pipeline = "appsrc ! videoconvert ! nvvidconv ! video/x-raw(memory:NVMM), format=(string)I420 " + 
+    //                                 "! nvv4l2h264enc profile=2 preset-level=1 control-rate=1 bitrate=10000000 " +
+    //                                 "! video/x-h264, stream-format=(string)byte-stream ! h264parse ! qtmux " +
+    //                                 "! filesink location=test.mp4";
+    // int codec = cv::VideoWriter::fourcc('m', 'p', '4', 'v'); 
+
+    std::string output_pipeline = "appsrc ! videoconvert ! omxh264enc ! mpegtsmux ! filesink location=output.ts"; 
+
+    cv::VideoWriter writer(output_pipeline, cv::CAP_GSTREAMER, 0, (double)capture_framerate, cv::Size(capture_width, capture_height)); 
 
     if(!writer.isOpened())  // check if we succeeded
     {
