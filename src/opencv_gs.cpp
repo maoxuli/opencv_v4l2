@@ -64,28 +64,45 @@ int main(int argc, char **argv)
         framerate = 30; 
     }
 
-    VideoCapture cap;
     int capture_width = width;
     int capture_height = height;
     int capture_framerate = framerate;
-    int flip_method = 0 ;
-    cap.open("nvarguscamerasrc ! video/x-raw(memory:NVMM), width=(int)" + std::to_string(capture_width) + 
-            ", height=(int)" + std::to_string(capture_height) + 
-            ", format=(string)NV12, framerate=(fraction)" + std::to_string(capture_framerate) +
-            "/1 ! nvvidconv flip-method=" + std::to_string(flip_method) + " ! appsink", 
-            cv::CAP_GSTREAMER);
+    std::string input_pipline = "nvarguscamerasrc ! video/x-raw(memory:NVMM), width=(int)" + std::to_string(capture_width) + 
+                                ", height=(int)" + std::to_string(capture_height) + ", format=(string)NV12" + 
+                                ", framerate=(fraction)" + std::to_string(capture_framerate) + "/1 " + 
+                                "! nvvidconv flip-method=0 ! appsink ";
+    cv::VideoCapture cap(input_pipline, cv::CAP_GSTREAMER);
 
     if(!cap.isOpened())  // check if we succeeded
+    {
+        std::cerr << "Failed to open camera!" << std::endl; 
         return EXIT_FAILURE;
+    }
 
-    cout << "Current resolution: Width: " << cap.get(CAP_PROP_FRAME_WIDTH) << " Height: " << cap.get(CAP_PROP_FRAME_HEIGHT) << '\n';
+    capture_width = cap.get(CAP_PROP_FRAME_WIDTH);
+    capture_height = cap.get(CAP_PROP_FRAME_HEIGHT);
+    cout << "Current resolution: Width: " << capture_width << " Height: " << capture_height << '\n';
     // cout << "Current framerate: " << cap.get(CAP_PROP_FPS) << '\n';
 
+
+    std::string output_pipeline = "appsrc ! videoconvert ! video/x-raw, width=(int)" + std::to_string(capture_width) + 
+                                  ", height=(int)" + std::to_string(capture_height) +  ", format=(string)I420 " + 
+                                  "! omxh264enc preset-level=0 ! video/x-h264, stream-format=(string)byte-stream " + 
+                                  "! filesink location=output.mp4 ";
+    int codec = cv::VideoWriter::fourcc('m', 'p', '4', 'v'); 
+    cv::VideoWriter writer(output_pipeline, cv::CAP_GSTREAMER, codec, (double)capture_framerate, cv::Size(capture_width, capture_height)); 
+
+    if(!writer.isOpened())  // check if we succeeded
+    {
+        std::cerr << "Failed to open file!" << std::endl; 
+        return EXIT_FAILURE;
+    }
+
     /*
-        * Re-using the frame matrix(ces) instead of creating new ones (i.e., declaring 'Mat frame'
-        * (and cuda::GpuMat gpu_frame) outside the 'while (1)' loop instead of declaring it
-        * within the loop) improves the performance for higher resolutions.
-        */
+    * Re-using the frame matrix(ces) instead of creating new ones (i.e., declaring 'Mat frame'
+    * (and cuda::GpuMat gpu_frame) outside the 'while (1)' loop instead of declaring it
+    * within the loop) improves the performance for higher resolutions.
+    */
     Mat frame;
 #if defined(ENABLE_DISPLAY) && defined(ENABLE_GL_DISPLAY) && defined(ENABLE_GPU_UPLOAD)
     cuda::GpuMat gpu_frame;
@@ -115,6 +132,8 @@ int main(int argc, char **argv)
             cerr << "Empty frame received from camera!\n";
             return EXIT_FAILURE;
         }
+
+        writer << frame; // save a new frame to file 
 
     #ifdef ENABLE_DISPLAY
         /*
