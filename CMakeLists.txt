@@ -21,6 +21,9 @@ set (OPENCV_BUILDINFO_BIN "opencv-buildinfo")
 find_package( OpenCV 4 REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
+find_package(Boost REQUIRED COMPONENTS system thread)
+include_directories( ${Boost_INCLUDE_DIRS} )
+
 # Include the directories containing libraries
 include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/lib")
 add_subdirectory (lib)
@@ -70,7 +73,7 @@ target_compile_definitions (${OPENCV_MAIN_GPU_DISPLAY_BIN} PUBLIC ENABLE_DISPLAY
 target_link_libraries (${OPENCV_MAIN_GPU_DISPLAY_BIN} ${OpenCV_LIBS})
 
 add_executable (${OPENCV_GS_BIN} ${GS_SOURCE})
-target_link_libraries (${OPENCV_GS_BIN} ${OpenCV_LIBS})
+target_link_libraries (${OPENCV_GS_BIN} ${OpenCV_LIBS} ${Boost_LIBRARIES})
 
 add_executable (${OPENCV_BUILDINFO_BIN} ${INFO_SOURCE})
 target_link_libraries (${OPENCV_BUILDINFO_BIN} ${OpenCV_LIBS})

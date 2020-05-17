@@ -111,7 +111,7 @@ int main(int argc, char **argv)
             return EXIT_FAILURE;
         }
 
-        imwrite("/home/media/b/" + std::to_string(index++) + ".jpg", frame); 
+        imwrite("/home/maoxu/b/" + std::to_string(index++) + ".jpg", frame); 
 
     #ifdef ENABLE_DISPLAY
         /*

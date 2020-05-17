@@ -8,6 +8,7 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <sys/time.h>
+#include <boost/thread.hpp>
 
 #include <chrono> 
 using namespace std::chrono; 
@@ -21,6 +22,47 @@ unsigned int GetTickCount()
     if(gettimeofday(&tv, NULL) != 0)
             return 0;
     return (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+}
+
+// recording thread 
+bool _stop = false;
+boost::thread _thread;
+
+boost::mutex _mutex; 
+cv::Mat _frame; 
+bool _update = false; 
+
+cv::VideoWriter writer; 
+
+
+void ThreadFunc() 
+{
+    unsigned int start, end, fps = 0; 
+    start = GetTickCount();
+    while (!_stop)
+    {
+        {
+            boost::mutex::scoped_lock lock(_mutex);
+            if (_update)
+            {
+                // auto T1 = high_resolution_clock::now(); 
+                writer << _frame; // save a new frame to file 
+                // auto T2 = high_resolution_clock::now(); 
+                //writer << frame; // save a new frame to file 
+                // auto D2 = duration_cast<milliseconds>(T2 - T1); 
+                // cout << "record: " << D2.count() << endl;
+                _update = false;
+                fps++;
+            }
+        }
+        end = GetTickCount();
+        if ((end - start) >= 1000) {
+            cout << "record fps = " << fps << endl ;
+            fps = 0;
+            start = end;
+        }
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+    }
 }
 
 int main(int argc, char **argv)
@@ -96,25 +138,13 @@ int main(int argc, char **argv)
 
     // std::string output_pipeline = "appsrc ! videoconvert ! omxh264enc ! mpegtsmux ! filesink location=output.ts"; 
     int codec = cv::VideoWriter::fourcc('X', '2', '6', '4'); 
-    cv::VideoWriter writer(output_pipeline, cv::CAP_GSTREAMER, codec, (double)capture_framerate, cv::Size(capture_width, capture_height)); 
+    writer.open(output_pipeline, cv::CAP_GSTREAMER, codec, (double)capture_framerate, cv::Size(capture_width, capture_height)); 
 
     if(!writer.isOpened())  // check if we succeeded
     {
         std::cerr << "Failed to open file!" << std::endl; 
         return EXIT_FAILURE;
     }
-
-    /*
-    * Re-using the frame matrix(ces) instead of creating new ones (i.e., declaring 'Mat frame'
-    * (and cuda::GpuMat gpu_frame) outside the 'while (1)' loop instead of declaring it
-    * within the loop) improves the performance for higher resolutions.
-    */
-    Mat frame;
-#if defined(ENABLE_DISPLAY) && defined(ENABLE_GL_DISPLAY) && defined(ENABLE_GPU_UPLOAD)
-    cuda::GpuMat gpu_frame;
-#endif
-
-    unsigned int start, end , fps = 0;
 
 #ifdef ENABLE_DISPLAY
     /*
@@ -129,26 +159,38 @@ int main(int argc, char **argv)
     cout << "Note: Click 'Esc' key to exit the window.\n";
 #endif
 
-    int index = 0; 
+    /*
+    * Re-using the frame matrix(ces) instead of creating new ones (i.e., declaring 'Mat frame'
+    * (and cuda::GpuMat gpu_frame) outside the 'while (1)' loop instead of declaring it
+    * within the loop) improves the performance for higher resolutions.
+    */
+    Mat frame;
+#if defined(ENABLE_DISPLAY) && defined(ENABLE_GL_DISPLAY) && defined(ENABLE_GPU_UPLOAD)
+    cuda::GpuMat gpu_frame;
+#endif
+
+    // start to capture image in a separate thread 
+    _thread = boost::thread(ThreadFunc);
+
+    unsigned int start, end , fps = 0;
     start = GetTickCount();
     while (1) 
     {
-        auto T0 = high_resolution_clock::now(); 
+        // auto T0 = high_resolution_clock::now(); 
         cap >> frame; // get a new frame from camera
-        auto T1 = high_resolution_clock::now(); 
         if (frame.empty())
         {
             cerr << "Empty frame received from camera!\n";
             return EXIT_FAILURE;
         }
-
-        imwrite("/home/nvidia/a/" + std::to_string(index++) + ".jpg", frame); 
-
-        //writer << frame; // save a new frame to file 
-        auto T2 = high_resolution_clock::now(); 
-        auto D1 = duration_cast<milliseconds>(T1 - T0); 
-        auto D2 = duration_cast<milliseconds>(T2 - T1); 
-        cout << "capture: " << D1.count() << "; write: " << D2.count() << endl;
+        {
+            boost::mutex::scoped_lock lock(_mutex);
+            _frame = frame.clone(); 
+            _update = true;
+        }
+        // auto T1 = high_resolution_clock::now(); 
+        // auto D1 = duration_cast<milliseconds>(T1 - T0); 
+        // cout << "capture: " << D1.count() << endl;
 
     #ifdef ENABLE_DISPLAY
         /*
@@ -173,11 +215,14 @@ int main(int argc, char **argv)
         fps++;
         end = GetTickCount();
         if ((end - start) >= 1000) {
-            cout << "fps = " << fps << endl ;
+            cout << "capture fps = " << fps << endl ;
             fps = 0;
             start = end;
         }
     }
+
+    _stop = true;
+    _thread.join(); 
 
     // the camera will be deinitialized automatically in VideoCapture destructor
     return 0;
