@@ -67,11 +67,11 @@ int main(int argc, char **argv)
     int capture_width = width;
     int capture_height = height;
     int capture_framerate = framerate;
-    std::string input_pipline = "nvarguscamerasrc ! video/x-raw(memory:NVMM), width=(int)" + std::to_string(capture_width) + 
-                                ", height=(int)" + std::to_string(capture_height) + ", format=(string)NV12" + 
-                                ", framerate=(fraction)" + std::to_string(capture_framerate) + "/1 " + 
-                                "! nvvidconv flip-method=0 ! video/x-raw, format=(string)BGRx " +  
-                                "! videoconvert ! video/x-raw, format=(string)BGR ! appsink ";
+    std::string input_pipline = "nvarguscamerasrc ! video/x-raw(memory:NVMM), width=(int)" + std::to_string(capture_width) + ", " +
+                                "height=(int)" + std::to_string(capture_height) + ", format=(string)NV12, " + 
+                                "framerate=(fraction)" + std::to_string(capture_framerate) + "/1 ! " + 
+                                "nvvidconv flip-method=0 ! video/x-raw, format=(string)BGRx ! " +  
+                                "videoconvert ! video/x-raw, format=(string)BGR ! appsink";
     cv::VideoCapture cap(input_pipline, cv::CAP_GSTREAMER);
 
     if(!cap.isOpened())  // check if we succeeded
@@ -86,19 +86,15 @@ int main(int argc, char **argv)
     cout << "Capture frame rate: " << cap.get(CAP_PROP_FPS) << '\n';
 
 
-    // "appsrc ! video/x-raw,width=1920,height=1080,format=(string)RGB,framerate=(fraction)15/1 " +
-    // "! nvvideoconvert ! video/x-raw(memory:NVMM), format=(string)NV12 " +
-    // "! nvv4l2h264enc preset-level=3 profile=4 insert-sps-pps=1 qp-range=8,24:8,24:8,24 " +
-    // "! video/x-h264,stream-format=byte-stream ! h264parse ! qtmux " + 
-    // "! filesink location=output.mp4"
+    std::string output_pipeline = std::string("appsrc ! video/x-raw, format=(string)BGR ! videoconvert ! video/x-raw, format=BGRx ! ") + 
+                                  "nvvidconv ! video/x-raw(memory:NVMM), format=(string)I420 ! " + 
+                                  //"nvvidconv ! video/x-raw(memory:NVMM), format=(string)NV12 ! " +
+                                  "nvv4l2h264enc preset-level=1 profile=2 control-rate=1 bitrate=10000000 ! " +
+                                  //"nvv4l2h264enc preset-level=3 profile=4 insert-sps-pps=1 qp-range=8,24:8,24:8,24 ! " +
+                                  "video/x-h264, stream-format=(string)byte-stream ! h264parse ! qtmux ! " +
+                                  "filesink location=output.mp4";
 
-    // std::string output_pipeline = "appsrc ! videoconvert ! nvvidconv ! video/x-raw(memory:NVMM), format=(string)I420 " + 
-    //                                 "! nvv4l2h264enc profile=2 preset-level=1 control-rate=1 bitrate=10000000 " +
-    //                                 "! video/x-h264, stream-format=(string)byte-stream ! h264parse ! qtmux " +
-    //                                 "! filesink location=test.mp4";
-    // int codec = cv::VideoWriter::fourcc('m', 'p', '4', 'v'); 
-
-    std::string output_pipeline = "appsrc ! videoconvert ! omxh264enc ! mpegtsmux ! filesink location=output.ts"; 
+    // std::string output_pipeline = "appsrc ! videoconvert ! omxh264enc ! mpegtsmux ! filesink location=output.ts"; 
 
     cv::VideoWriter writer(output_pipeline, cv::CAP_GSTREAMER, 0, (double)capture_framerate, cv::Size(capture_width, capture_height)); 
 
