@@ -9,6 +9,9 @@
 #include <iostream>
 #include <sys/time.h>
 
+#include <chrono> 
+using namespace std::chrono; 
+
 using namespace std;
 using namespace cv;
 
@@ -88,9 +91,8 @@ int main(int argc, char **argv)
     std::string output_pipeline = std::string("appsrc ! video/x-raw, format=(string)BGR ! videoconvert ! video/x-raw, format=BGRx ! ") + 
                                   "nvvidconv ! video/x-raw(memory:NVMM), format=(string)I420 ! " + 
                                   //"nvvidconv ! video/x-raw(memory:NVMM), format=(string)NV12 ! " +
-                                  //"omxh264enc qp-range=20,20:20,20:-1,-1 ! matroskamux ! queue ! " +
-                                  "nvv4l2h264enc bitrate=8000000 ! h264parse ! qtmux !"
-                                  "filesink location=output.mp4";
+                                  "omxh264enc ! matroskamux ! queue ! " +
+                                  "filesink location=output.mkv";
 
     // std::string output_pipeline = "appsrc ! videoconvert ! omxh264enc ! mpegtsmux ! filesink location=output.ts"; 
     int codec = cv::VideoWriter::fourcc('X', '2', '6', '4'); 
@@ -130,7 +132,9 @@ int main(int argc, char **argv)
     start = GetTickCount();
     while (1) 
     {
+        auto T0 = high_resolution_clock::now(); 
         cap >> frame; // get a new frame from camera
+        auto T1 = high_resolution_clock::now(); 
         if (frame.empty())
         {
             cerr << "Empty frame received from camera!\n";
@@ -138,6 +142,10 @@ int main(int argc, char **argv)
         }
 
         writer << frame; // save a new frame to file 
+        auto T2 = high_resolution_clock::now(); 
+        auto D1 = duration_cast<milliseconds>(T1 - T0); 
+        auto D2 = duration_cast<milliseconds>(T2 - T1); 
+        cout << "capture: " << D1.count() << "; write: " << D2.count() << endl;
 
     #ifdef ENABLE_DISPLAY
         /*
