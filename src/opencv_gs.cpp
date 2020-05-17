@@ -88,12 +88,12 @@ int main(int argc, char **argv)
     std::string output_pipeline = std::string("appsrc ! video/x-raw, format=(string)BGR ! videoconvert ! video/x-raw, format=BGRx ! ") + 
                                   "nvvidconv ! video/x-raw(memory:NVMM), format=(string)I420 ! " + 
                                   //"nvvidconv ! video/x-raw(memory:NVMM), format=(string)NV12 ! " +
-                                  "omxh265enc ! qtmux ! " +
-                                  //"nvv4l2h265enc bitrate=8000000 ! h265parse ! qtmux !"
-                                  "filesink location=output.mp4";
+                                  "omxh264enc qp-range=20,20:20,20:-1,-1 ! matroskamux ! queue ! " +
+                                  //"nvv4l2h264enc bitrate=8000000 ! h264parse ! qtmux !"
+                                  "filesink location=output.mkv";
 
     // std::string output_pipeline = "appsrc ! videoconvert ! omxh264enc ! mpegtsmux ! filesink location=output.ts"; 
-    int codec = cv::VideoWriter::fourcc('m', 'p', '4', 'v'); 
+    int codec = cv::VideoWriter::fourcc('X', '2', '6', '4'); 
     cv::VideoWriter writer(output_pipeline, cv::CAP_GSTREAMER, codec, (double)capture_framerate, cv::Size(capture_width, capture_height)); 
 
     if(!writer.isOpened())  // check if we succeeded
