@@ -70,9 +70,7 @@ int main(int argc, char **argv)
     std::string input_pipline = "nvarguscamerasrc ! video/x-raw(memory:NVMM), width=(int)" + std::to_string(capture_width) + 
                                 ", height=(int)" + std::to_string(capture_height) + ", format=(string)NV12" + 
                                 ", framerate=(fraction)" + std::to_string(capture_framerate) + "/1 " + 
-                                "! nvvidconv flip-method=0 "
-                                "! video/x-raw, width=(int)" + std::to_string(capture_width) + 
-                                ", height=(int)" + std::to_string(capture_height) + ", format=(string)BGRx " +  
+                                "! nvvidconv flip-method=0 ! video/x-raw, format=(string)BGRx " +  
                                 "! videoconvert ! video/x-raw, format=(string)BGR ! appsink ";
     cv::VideoCapture cap(input_pipline, cv::CAP_GSTREAMER);
 
