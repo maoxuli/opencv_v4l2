@@ -85,7 +85,6 @@ int main(int argc, char **argv)
     cout << "Capture resolution: Width: " << capture_width << " Height: " << capture_height << '\n';
     cout << "Capture frame rate: " << cap.get(CAP_PROP_FPS) << '\n';
 
-
     std::string output_pipeline = std::string("appsrc ! video/x-raw, format=(string)BGR ! videoconvert ! video/x-raw, format=BGRx ! ") + 
                                   "nvvidconv ! video/x-raw(memory:NVMM), format=(string)I420 ! " + 
                                   //"nvvidconv ! video/x-raw(memory:NVMM), format=(string)NV12 ! " +
@@ -94,8 +93,8 @@ int main(int argc, char **argv)
                                   "filesink location=output.mp4";
 
     // std::string output_pipeline = "appsrc ! videoconvert ! omxh264enc ! mpegtsmux ! filesink location=output.ts"; 
-
-    cv::VideoWriter writer(output_pipeline, cv::CAP_GSTREAMER, 0, (double)capture_framerate, cv::Size(capture_width, capture_height)); 
+    int codec = cv::VideoWriter::fourcc('m', 'p', '4', 'v'); 
+    cv::VideoWriter writer(output_pipeline, cv::CAP_GSTREAMER, codec, (double)capture_framerate, cv::Size(capture_width, capture_height)); 
 
     if(!writer.isOpened())  // check if we succeeded
     {
