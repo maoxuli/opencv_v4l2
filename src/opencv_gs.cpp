@@ -129,6 +129,7 @@ int main(int argc, char **argv)
     cout << "Note: Click 'Esc' key to exit the window.\n";
 #endif
 
+    int index = 0; 
     start = GetTickCount();
     while (1) 
     {
@@ -141,7 +142,9 @@ int main(int argc, char **argv)
             return EXIT_FAILURE;
         }
 
-        writer << frame; // save a new frame to file 
+        imwrite("/home/nvidia/a/" + std::to_string(index++) + ".jpg", frame); 
+
+        //writer << frame; // save a new frame to file 
         auto T2 = high_resolution_clock::now(); 
         auto D1 = duration_cast<milliseconds>(T1 - T0); 
         auto D2 = duration_cast<milliseconds>(T2 - T1); 
