@@ -30,10 +30,9 @@ boost::thread _thread;
 
 boost::mutex _mutex; 
 cv::Mat _frame; 
-bool _update = false; 
+bool _updated = false; 
 
 cv::VideoWriter writer; 
-
 
 void ThreadFunc() 
 {
@@ -43,7 +42,7 @@ void ThreadFunc()
     {
         {
             boost::mutex::scoped_lock lock(_mutex);
-            if (_update)
+            if (_updated)
             {
                 // auto T1 = high_resolution_clock::now(); 
                 writer << _frame; // save a new frame to file 
@@ -51,7 +50,7 @@ void ThreadFunc()
                 //writer << frame; // save a new frame to file 
                 // auto D2 = duration_cast<milliseconds>(T2 - T1); 
                 // cout << "record: " << D2.count() << endl;
-                _update = false;
+                _updated = false;
                 fps++;
             }
         }
@@ -67,7 +66,7 @@ void ThreadFunc()
 
 int main(int argc, char **argv)
 {
-    unsigned int width, height, framerate;
+    unsigned int width, height, framerate, id;
     if (argc == 4)
     {
         /*
@@ -76,6 +75,7 @@ int main(int argc, char **argv)
         string width_str = argv[1];
         string height_str = argv[2];
         string framerate_str = argv[3];
+        string id_str = argv[4];
         try {
             size_t pos;
             width = stoi(width_str, &pos);
@@ -92,27 +92,36 @@ int main(int argc, char **argv)
             if (pos < framerate_str.size()) {
                 cerr << "Trailing characters after framerate: " << framerate_str << '\n';
             }
+
+            id = stoi(id_str, &pos);
+            if (pos < id_str.size()) {
+                cerr << "Trailing characters after id: " << id_str << '\n';
+            }
         } catch (invalid_argument const &ex) {
-            cerr << "Invalid width, height, or framerate\n";
+            cerr << "Invalid width, height, framerate, or camera ID\n";
             return EXIT_FAILURE;
         } catch (out_of_range const &ex) {
-            cerr << "Width, Height, or Framerate out of range\n";
+            cerr << "Width, Height, Framerate, or camera ID out of range\n";
             return EXIT_FAILURE;
         }
     }
     else
     {
-        cout << "Note: This program accepts (only) three arguments. First arg: width, Second arg: height, third arg: framerate\n";
-        cout << "No arguments given. Assuming default values. Width: 640; Height: 480\n";
-        width = 1280;
-        height = 720;
-        framerate = 30; 
+        cout << "Note: This program accepts (only) four arguments.\n";
+        cout << "First arg: width, Second arg: height, third arg: framerate, fourth arg: camera_id\n";
+        cout << "No arguments given. Assuming default values. width: 1920; height: 1080; framerate: 30; camera_id: 0\n";
+        width = 1920;
+        height = 1080;
+        framerate = 30;
+        id = 0; 
     }
 
     int capture_width = width;
     int capture_height = height;
     int capture_framerate = framerate;
-    std::string input_pipline = "nvarguscamerasrc ! video/x-raw(memory:NVMM), width=(int)" + std::to_string(capture_width) + ", " +
+    int camera_id = id;
+    std::string input_pipline = "nvarguscamerasrc ! video/x-raw(memory:NVMM), sensor_id=(int)" + std::to_string(camera_id) + ", " +
+                                "width=(int)" + std::to_string(capture_width) + ", " +
                                 "height=(int)" + std::to_string(capture_height) + ", format=(string)NV12, " + 
                                 "framerate=(fraction)" + std::to_string(capture_framerate) + "/1 ! " + 
                                 "nvvidconv flip-method=0 ! video/x-raw, format=(string)BGRx ! " +  
@@ -121,20 +130,20 @@ int main(int argc, char **argv)
 
     if(!cap.isOpened())  // check if we succeeded
     {
-        std::cerr << "Failed to open camera!" << std::endl; 
+        std::cerr << "Failed to open camera: " << camera_id << std::endl; 
         return EXIT_FAILURE;
     }
 
     capture_width = cap.get(CAP_PROP_FRAME_WIDTH);
     capture_height = cap.get(CAP_PROP_FRAME_HEIGHT);
-    cout << "Capture resolution: Width: " << capture_width << " Height: " << capture_height << '\n';
-    cout << "Capture frame rate: " << cap.get(CAP_PROP_FPS) << '\n';
+    cout << "Camera: " << camera_id << " Width: " << capture_width << " Height: " << capture_height << '\n';
+    cout << "FPS: " << cap.get(CAP_PROP_FPS) << '\n';
 
     std::string output_pipeline = std::string("appsrc ! video/x-raw, format=(string)BGR ! videoconvert ! video/x-raw, format=BGRx ! ") + 
                                   "nvvidconv ! video/x-raw(memory:NVMM), format=(string)I420 ! " + 
                                   //"nvvidconv ! video/x-raw(memory:NVMM), format=(string)NV12 ! " +
                                   "omxh264enc ! matroskamux ! queue ! " +
-                                  "filesink location=output.mkv";
+                                  "filesink location=output_" + std::to_string(camera_id) + ".mkv";
 
     // std::string output_pipeline = "appsrc ! videoconvert ! omxh264enc ! mpegtsmux ! filesink location=output.ts"; 
     int codec = cv::VideoWriter::fourcc('X', '2', '6', '4'); 
@@ -142,7 +151,7 @@ int main(int argc, char **argv)
 
     if(!writer.isOpened())  // check if we succeeded
     {
-        std::cerr << "Failed to open file!" << std::endl; 
+        std::cerr << "Failed to open file for camera: " << camera_id << std::endl; 
         return EXIT_FAILURE;
     }
 
@@ -176,7 +185,6 @@ int main(int argc, char **argv)
     start = GetTickCount();
     while (1) 
     {
-        // auto T0 = high_resolution_clock::now(); 
         cap >> frame; // get a new frame from camera
         if (frame.empty())
         {
@@ -186,7 +194,7 @@ int main(int argc, char **argv)
         {
             boost::mutex::scoped_lock lock(_mutex);
             _frame = frame.clone(); 
-            _update = true;
+            _updated = true;
         }
         // auto T1 = high_resolution_clock::now(); 
         // auto D1 = duration_cast<milliseconds>(T1 - T0); 
