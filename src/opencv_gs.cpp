@@ -67,7 +67,7 @@ void ThreadFunc()
 int main(int argc, char **argv)
 {
     unsigned int width, height, framerate, id;
-    if (argc == 4)
+    if (argc == 5)
     {
         /*
         * Courtesy: https://stackoverflow.com/a/2797823
