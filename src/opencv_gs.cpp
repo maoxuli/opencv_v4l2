@@ -120,9 +120,10 @@ int main(int argc, char **argv)
     int capture_height = height;
     int capture_framerate = framerate;
     int camera_id = id;
-    std::string input_pipline = "nvarguscamerasrc ! video/x-raw(memory:NVMM), sensor-id=" + std::to_string(camera_id) + ", " +
+    std::string input_pipline = "nvarguscamerasrc sensor-id=" + std::to_string(camera_id) + " ! " +
+                                "video/x-raw(memory:NVMM), format=(string)NV12, " + 
                                 "width=(int)" + std::to_string(capture_width) + ", " +
-                                "height=(int)" + std::to_string(capture_height) + ", format=(string)NV12, " + 
+                                "height=(int)" + std::to_string(capture_height) + ", " + 
                                 "framerate=(fraction)" + std::to_string(capture_framerate) + "/1 ! " + 
                                 "nvvidconv flip-method=0 ! video/x-raw, format=(string)BGRx ! " +  
                                 "videoconvert ! video/x-raw, format=(string)BGR ! appsink";
